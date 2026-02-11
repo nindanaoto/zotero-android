@@ -1,21 +1,32 @@
 package org.zotero.android.screens.allitems
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import org.zotero.android.appupdate.MaybeShowAppUpdateBanner
 import org.zotero.android.architecture.ui.CustomLayoutSize
 import org.zotero.android.screens.allitems.bottomsheet.AllItemsAddBottomSheet
 import org.zotero.android.screens.allitems.table.AllItemsTable
+import org.zotero.android.screens.share.ShareActivity
 import org.zotero.android.uicomponents.CustomScaffoldM3
 import org.zotero.android.uicomponents.Strings
 import org.zotero.android.uicomponents.error.FullScreenError
@@ -49,10 +60,14 @@ internal fun AllItemsScreen(
     onShowHtmlOrEpub: (String) -> Unit,
 ) {
     AppThemeM3 {
+        val context = LocalContext.current
         val layoutType = CustomLayoutSize.calculateLayoutType()
         val viewState by viewModel.viewStates.observeAsState(AllItemsViewState())
         val viewEffect by viewModel.viewEffects.observeAsState()
         val lazyListState = rememberLazyListState()
+
+        var showUrlDialog by remember { mutableStateOf(false) }
+        var urlText by remember { mutableStateOf("") }
 
         val isTablet = layoutType.isTablet()
 
@@ -151,6 +166,18 @@ internal fun AllItemsScreen(
                 AllItemsViewEffect.ShowCitationBibliographyExportEffect -> {
                     navigateToCitationBibliographyExport()
                 }
+
+                AllItemsViewEffect.ShowAddFromUrlDialogEffect -> {
+                    urlText = ""
+                    showUrlDialog = true
+                }
+
+                is AllItemsViewEffect.LaunchShareActivityEffect -> {
+                    val shareIntent = Intent().apply {
+                        putExtra(Intent.EXTRA_TEXT, consumedEffect.url)
+                    }
+                    context.startActivity(ShareActivity.getIntent(shareIntent, context))
+                }
             }
         }
         val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -232,9 +259,40 @@ internal fun AllItemsScreen(
             onAddNote = viewModel::onAddNote,
             onAddManually = { viewModel.onAddManually(bottomSheetTitle) },
             onAddByIdentifier = viewModel::onAddByIdentifier,
+            onAddFromUrl = viewModel::onAddFromUrl,
             onClose = viewModel::onAddBottomSheetCollapse,
             showBottomSheet = viewState.shouldShowAddBottomSheet
         )
 
+        if (showUrlDialog) {
+            AlertDialog(
+                onDismissRequest = { showUrlDialog = false },
+                title = { Text(stringResource(id = Strings.items_add_from_url)) },
+                text = {
+                    OutlinedTextField(
+                        value = urlText,
+                        onValueChange = { urlText = it },
+                        label = { Text("URL") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showUrlDialog = false
+                            viewModel.onAddFromUrlSubmit(urlText)
+                        }
+                    ) {
+                        Text(stringResource(id = Strings.add))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showUrlDialog = false }) {
+                        Text(stringResource(id = Strings.cancel))
+                    }
+                },
+            )
+        }
     }
 }

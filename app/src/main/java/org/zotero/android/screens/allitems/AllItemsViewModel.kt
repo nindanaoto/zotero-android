@@ -1080,6 +1080,17 @@ internal class AllItemsViewModel @Inject constructor(
         triggerEffect(ShowScanBarcode)
     }
 
+    fun onAddFromUrl() {
+        triggerEffect(AllItemsViewEffect.ShowAddFromUrlDialogEffect)
+    }
+
+    fun onAddFromUrlSubmit(url: String) {
+        val trimmed = url.trim()
+        if (trimmed.isNotBlank()) {
+            triggerEffect(AllItemsViewEffect.LaunchShareActivityEffect(trimmed))
+        }
+    }
+
     private fun createShowFilterArgs(): FilterArgs {
         val selectedTags =
             viewState.filters.filterIsInstance<ItemsFilter.tags>().flatMap { it.tags }.toSet()
@@ -1419,5 +1430,6 @@ internal sealed class AllItemsViewEffect : ViewEffect {
     object MaybeScrollToTop : AllItemsViewEffect()
     object ShowSingleCitationEffect: AllItemsViewEffect()
     object ShowCitationBibliographyExportEffect: AllItemsViewEffect()
-
+    object ShowAddFromUrlDialogEffect : AllItemsViewEffect()
+    data class LaunchShareActivityEffect(val url: String) : AllItemsViewEffect()
 }

@@ -109,6 +109,7 @@
     <string name="items_ascending">Ascending</string>
     <string name="items_descending">Descending</string>
     <string name="items_lookup">Add by Identifier</string>
+    <string name="items_add_from_url">Add from URL</string>
     <string name="items_barcode">Scan Barcode</string>
     <string name="items_new">Add Manually</string>
     <string name="items_new_note">New Standalone Note</string>

@@ -18,6 +18,7 @@ internal fun AllItemsAddBottomSheet(
     onAddNote: () -> Unit,
     onAddManually: () -> Unit,
     onAddByIdentifier: () -> Unit,
+    onAddFromUrl: () -> Unit,
     onClose: () -> Unit,
     showBottomSheet: Boolean,
 ) {
@@ -54,6 +55,10 @@ internal fun AllItemsAddBottomSheet(
                     onAddByIdentifier = {
                         onClose()
                         onAddByIdentifier()
+                    },
+                    onAddFromUrl = {
+                        onClose()
+                        onAddFromUrl()
                     }
                 )
             },

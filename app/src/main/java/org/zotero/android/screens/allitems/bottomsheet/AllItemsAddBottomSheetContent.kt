@@ -16,12 +16,17 @@ internal fun AllItemsAddBottomSheetContent(
     onAddNote: () -> Unit,
     onAddManually: () -> Unit,
     onAddByIdentifier: () -> Unit,
+    onAddFromUrl: () -> Unit,
 ) {
     Column {
         Spacer(modifier = Modifier.height(8.dp))
         AllItemsAddBottomSheetRow(
             title = stringResource(id = Strings.items_lookup),
             onClick = onAddByIdentifier
+        )
+        AllItemsAddBottomSheetRow(
+            title = stringResource(id = Strings.items_add_from_url),
+            onClick = onAddFromUrl
         )
         AllItemsAddBottomSheetRow(
             title = stringResource(id = Strings.items_barcode),
