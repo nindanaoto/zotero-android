@@ -48,6 +48,15 @@ class ConnectorRepository @Inject constructor(
         return value
     }
 
+    @Synchronized fun selectedCollectionKey(): String {
+        if (files.getSelectedLibrary() != library) return ""
+        val selected = files.getSelectedCollectionId() as? CollectionIdentifier.collection ?: return ""
+        return database { realm ->
+            if (realm.where<RCollection>().key(selected.key, library)
+                    .equalTo("deleted", false).equalTo("trash", false).findFirst() != null) selected.key else ""
+        }
+    }
+
     @Synchronized fun collections(): List<Map<String, Any?>> = database { realm ->
         ReadCollectionsDbRequest(library, isAsync = false).process(realm)
             .map { mapOf("key" to it.key, "name" to it.name, "parentKey" to it.parentKey) }

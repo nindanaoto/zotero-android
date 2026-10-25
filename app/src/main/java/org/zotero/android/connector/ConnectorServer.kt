@@ -46,7 +46,8 @@ class ConnectorServer(
             if (!auth.authorized(session.headers["authorization"])) throw ConnectorError(401, "Pair this Connector with Zotero")
             if (path == listOf("status") && session.method == Method.GET) {
                 return response(200, mapOf("protocolVersion" to 1, "storageMode" to if (defaults.isWebDavEnabled()) "webdav" else "disabled",
-                    "syncInProgress" to scheduler.inProgress.value))
+                    "syncInProgress" to scheduler.inProgress.value,
+                    "selectedCollectionKey" to repository.selectedCollectionKey()))
             }
             if (!defaults.isWebDavEnabled()) throw ConnectorError(409, "Configure WebDAV in Zotero before saving")
             if (path == listOf("collections") && session.method == Method.GET) return response(200, repository.collections())
