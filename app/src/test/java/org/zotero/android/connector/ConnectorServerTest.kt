@@ -31,6 +31,7 @@ class ConnectorServerTest {
         every { schema.itemTypes } returns listOf("journalArticle")
         every { defaults.isWebDavEnabled() } returns true
         every { scheduler.inProgress } returns MutableStateFlow(false)
+        every { repository.selectedCollectionKey() } returns ""
         server = ConnectorServer(auth, repository, defaults, sessions, wrapper, schema, scheduler, port = 0)
         server.start(5000, true)
     }
@@ -86,6 +87,13 @@ class ConnectorServerTest {
         }
         assertEquals(200, request("/saves/paper/attachments/pdf-0", "PUT", pdf, contentType = "application/pdf").first)
         assertEquals(415, request("/saves/paper/attachments/pdf-0", "PUT", pdf, contentType = "text/html").first)
+    }
+
+    @Test fun statusIncludesTheCurrentCollectionIncludingMyLibrary() {
+        every { repository.selectedCollectionKey() } returns "COLLECT1"
+        assertTrue(request("/status").second.contains("\"selectedCollectionKey\":\"COLLECT1\""))
+        every { repository.selectedCollectionKey() } returns ""
+        assertTrue(request("/status").second.contains("\"selectedCollectionKey\":\"\""))
     }
 
     @Test fun malformedMetadataIsRejectedWithoutCallingTheRepository() {
