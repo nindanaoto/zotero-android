@@ -1,6 +1,9 @@
 package org.zotero.android.sync
 
 import android.content.Context
+import android.content.Intent
+import org.zotero.android.connector.ConnectorAuth
+import org.zotero.android.connector.ConnectorService
 import io.realm.Realm
 import io.realm.exceptions.RealmError
 import kotlinx.coroutines.CoroutineScope
@@ -43,6 +46,7 @@ class IsUserInitializedEventStream @Inject constructor(applicationScope: Applica
 //Must be singleton, as its being used by ZoteroApplication Class
 @Singleton
 class Controllers @Inject constructor(
+    private val connectorAuth: ConnectorAuth,
     dispatchers: Dispatchers,
     private val sessionDataEventStream: SessionDataEventStream,
     private val applicationScope: ApplicationScope,
@@ -192,6 +196,8 @@ class Controllers @Inject constructor(
     }
 
     private fun clearSession() {
+        context.stopService(Intent(context, ConnectorService::class.java))
+        connectorAuth.clear()
         val controllers = this.userControllers
         controllers.disableSync(apiKey = this.apiKey)
         fileDownloader.stop()

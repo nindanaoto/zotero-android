@@ -30,6 +30,9 @@ import org.zotero.android.webdav.WebDavSessionStorage
 import org.zotero.android.webdav.data.WebDavUploadResult
 import timber.log.Timber
 import java.io.File
+import io.realm.Realm
+import io.realm.kotlin.where
+import org.zotero.android.database.objects.RConnectorAttachment
 
 class UploadAttachmentSyncAction @AssistedInject constructor(
     @Assisted("key") private val key: String,
@@ -54,6 +57,16 @@ class UploadAttachmentSyncAction @AssistedInject constructor(
 
     suspend fun result(): CustomResult<Unit> {
         return try {
+            if (!sessionStorage.isEnabled && !libraryId.isGroupLibrary) {
+                val connectorAttachment = Realm.getInstance(dbWrapperMain.config).use { realm ->
+                    realm.where<RConnectorAttachment>().equalTo("itemKey", key).count() > 0
+                }
+                if (connectorAttachment) {
+                    return CustomResult.GeneralError.CodeError(
+                        IllegalStateException("Enable WebDAV to sync this Connector attachment")
+                    )
+                }
+            }
             when (this.libraryId) {
                 is LibraryIdentifier.custom ->
                     if (sessionStorage.isEnabled) {

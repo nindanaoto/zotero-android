@@ -1,6 +1,9 @@
 package org.zotero.android.screens.settings
 
 import android.net.Uri
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
+import org.zotero.android.connector.ConnectorActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +34,7 @@ internal fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     AppThemeM3 {
+        val context = LocalContext.current
         val viewEffect by viewModel.viewEffects.observeAsState()
         LaunchedEffect(key1 = viewModel) {
             viewModel.init()
@@ -67,6 +71,10 @@ internal fun SettingsScreen(
 
                 NewSettingsDivider()
 
+                NewSettingsItem(
+                    title = "Browser saving",
+                    onItemTapped = { context.startActivity(Intent(context, ConnectorActivity::class.java)) },
+                )
                 NewSettingsItem(
                     title = stringResource(id = Strings.settings_export_title),
                     onItemTapped = toQuickCopyScreen,

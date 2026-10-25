@@ -1,6 +1,8 @@
 package org.zotero.android.database.migration.main
 
 import io.realm.annotations.RealmModule
+import org.zotero.android.database.objects.RConnectorSave
+import org.zotero.android.database.objects.RConnectorAttachment
 import org.zotero.android.database.objects.AllItemsDbRow
 import org.zotero.android.database.objects.RCollection
 import org.zotero.android.database.objects.RCondition
@@ -48,6 +50,8 @@ import org.zotero.android.database.objects.RWebDavDeletion
         RObjectChange::class,
         AllItemsDbRow::class,
         RLastReadDate::class,
+        RConnectorSave::class,
+        RConnectorAttachment::class,
     ]
 )
 data class MainConfigurationDbModule(val placeholder: String) { // empty data class for equals/hashcode
